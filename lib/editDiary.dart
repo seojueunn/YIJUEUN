@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class EditDiary extends StatefulWidget {
   final String diaryid;
   const EditDiary(this.diaryid,{Key? key}) : super(key: key);
   EditDiaryState createState() => EditDiaryState(diaryid);
-
 }
 
 enum BG {nothing, line, square}
@@ -17,8 +17,10 @@ class EditDiaryState extends State<EditDiary> {
   late String url;
 
   BG _BG = BG.nothing;
+  Color _color = Colors.amber;
   @override
   Widget build(BuildContext context) {
+
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -118,6 +120,48 @@ class EditDiaryState extends State<EditDiary> {
               });
             },
           ),
+
+          Padding(
+            padding:const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 20.0),
+            child: Container(
+              width: 300,
+              height: 50,
+              color: _color,
+            ),
+          ),
+
+          TextButton(
+            onPressed: (){
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context){
+                    return AlertDialog(
+                      title: Text('Pick a color!'),
+                      content: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: _color, //default color
+                          onColorChanged: (Color color){ //on color picked
+                            setState(() {
+                              _color = color;
+                            });
+                          },
+                        ),
+                      ),
+                      actions: <Widget>[
+                        ElevatedButton(
+                          child: const Text('DONE'),
+                          onPressed: () {
+                            Navigator.of(context).pop(); //dismiss the color picker
+                          },
+                        ),
+                      ],
+                    );
+                  }
+              );
+            },
+            child: Text("다이어리 배경색 바꾸기", style: TextStyle(color: Color(0xff5784A1), fontWeight: FontWeight.bold),),
+          ),
+          const SizedBox(height: 10.0),
           ElevatedButton(
             style: ButtonStyle(
               shape: MaterialStateProperty.all(
@@ -149,7 +193,7 @@ class EditDiaryState extends State<EditDiary> {
               final studyCollectionReference = FirebaseFirestore.instance.collection("diary").doc(diaryid);
               studyCollectionReference.update({
                 "background": url,
-
+                "backgroundColor" : _color.withOpacity(1),
               });
               Navigator.pushNamed(context, '/home');
 
