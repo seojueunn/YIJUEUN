@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'model/model_diary.dart';
+import 'model/model_myDiary.dart';
 
 class EnterDiary extends StatefulWidget {
   const EnterDiary({Key? key}) : super(key: key);
@@ -18,6 +22,9 @@ class EnterDiaryState extends State<EnterDiary> {
 
   @override
   Widget build(BuildContext context) {
+    String uid = auth.currentUser!.uid;
+    final myDiaryProvider = Provider.of<MyDiaryProvider>(context);
+    myDiaryProvider.fetchMyDiariesOrCreate(uid);
 
     return Scaffold(
         backgroundColor: Colors.white,
@@ -90,22 +97,55 @@ class EnterDiaryState extends State<EnterDiary> {
                           ),
                         ),
 
-                        onPressed: () {
+                        onPressed: () async {
                           if(_formKey.currentState!.validate()){
                             if(nameController.text != "" || PWController.text !=""){
-                              FirebaseFirestore.instance.collection('diary').doc(nameController.text).get().then
+                              final inputData = FirebaseFirestore.instance.collection('diary').doc(nameController.text);
+                              var checking = await inputData.get();
+                              if (!checking.exists) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Diary does not exist!"),
+                                      duration: Duration(seconds: 2),)
+                                );
+                              }
+                              else {
+                                PW = checking.get('PW').toString();
+                                if(PW == PWController.text.toString()) {
+                                  final myDiarySnapshot = await inputData.get();
+                                  Map<String,
+                                      dynamic> myDiariesMap = myDiarySnapshot
+                                      .data() as Map<String, dynamic>;
+                                  if (!myDiaryProvider.isRecSubIn(Diary.fromMap(
+                                      myDiariesMap))) {
+                                    myDiaryProvider.addMyDiary(
+                                        uid, Diary.fromMap(myDiariesMap));
+                                  }
+                                  Navigator.pushNamed(
+                                      context, '/home'); //다이어리 상세페이지로 이동
+                                }
+                                else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text("Wrong password!"),
+                                        duration: Duration(seconds: 2),)
+                                  );
+                                }
+                              }
+                                /*
                                 ((DocumentSnapshot ds){
                                 PW = ds["PW"].toString();
                                 if(PW == PWController.text.toString()){
-                                  Navigator.pushNamed(context, '/home'); //다이어리 상세페이지로 이동
-                                };
-                              });
-                            }
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Wrong Pass Word!"),
-                                  duration: Duration(seconds: 2),)
-                            );
 
+                                  Navigator.pushNamed(context, '/home'); //다이어리 상세페이지로 이동
+                                }
+                              });
+                                 */
+                            }
+                            else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text("Please enter the "),
+                                    duration: Duration(seconds: 2),)
+                              );
+                            }
                           }
 
                         },

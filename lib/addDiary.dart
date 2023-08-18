@@ -2,8 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+
 import 'package:provider/provider.dart';
-import 'package:yijueun_jueun/model/model_myDiary.dart';
+import 'model/model_myDiary.dart';
 
 import 'model/model_diary.dart';
 
@@ -24,7 +27,23 @@ class AddDiaryState extends State<AddDiary> {
 
 
   String currentdate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String createDate = DateFormat('yyyy.MM.dd (EEE)').format(DateTime.now()).toUpperCase();
+  String? _currentAddress;
 
+  void getLocation() async{
+    LocationPermission permission = await Geolocator.requestPermission();
+    Position position = await Geolocator.
+    getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    List<Placemark> place = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude);
+    Placemark place2 = place[0];
+    _currentAddress = "${place2.locality}, ${place2.country}";
+    //print(_currentAddress);
+
+  }
+
+  //
   @override
   Widget build(BuildContext context) {
     String uid = auth.currentUser!.uid;
@@ -32,8 +51,8 @@ class AddDiaryState extends State<AddDiary> {
     myDiaryProvider.fetchMyDiariesOrCreate(uid);
 
     String defaultBackground = "https://firebasestorage.googleapis.com/v0/b/yijueun-a1290.appspot.com/o/images%2Fnothing.png?alt=media&token=a739b2a9-c9a7-4a25-9c0d-96b7ff2611a0";
-    String defaultBackgroundColor = "Color(0xff629E44)";
-
+    int defaultBackgroundColor = Color(0xffCAF99B).value;
+    getLocation();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -137,11 +156,15 @@ class AddDiaryState extends State<AddDiary> {
 
                           studyCollectionReference.collection("diaryList").doc(currentdate).set({
                             'contents':'',
+                            'date': createDate,
+                            'location': _currentAddress,
                           });
 
                           final myDiarySnapshot = await studyCollectionReference.get();
                           Map<String, dynamic> myDiariesMap = myDiarySnapshot.data() as Map<String, dynamic>;
-                          myDiaryProvider.addMyDiary(uid, Diary.fromMap(myDiariesMap));
+                          if (!myDiaryProvider.isRecSubIn(Diary.fromMap(myDiariesMap))) {
+                            myDiaryProvider.addMyDiary(uid, Diary.fromMap(myDiariesMap));
+                          }
 
                           Navigator.pushNamed(context, '/home');
                         }
