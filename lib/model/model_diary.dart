@@ -6,7 +6,7 @@ class Diary {
   late String PW;
   late String description;
   late String background;
-  late String backgroundColor;
+  late int backgroundColor;
 
   Diary({
     required this.diaryName,
