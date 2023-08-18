@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:yijueun_jueun/model/model_myDiary.dart';
+import 'model/model_myDiary.dart';
 
 import 'Login/home2.dart';
 import 'Login/login.dart';
 import 'addDiary.dart';
 import 'home.dart';
 import 'enterDiary.dart';
-import 'model/model_myDiary.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
