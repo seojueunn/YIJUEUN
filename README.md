@@ -2,7 +2,7 @@
 repository for team YIJUEUN project
 
 ## 👋 소개
-
+<img width="1024" alt="diary" src="https://github.com/seojueunn/YIJUEUN/assets/79799635/195a4c23-49fa-43fe-a117-4554bba1447e">
 애플리케이션을 통해 소중한 사람들과 일기장을 공유하여 일상을 함께 할 수 있는 서비스를 제공합니다! <br>
 <최고심> 일러스트를 사용하여 전체적인 컨셉을 디자인 하였습니다. <br>
 일기장 이름과 비밀번호를 공유한 특정 사용자에게만 다이어리를 공개하며, <br>
